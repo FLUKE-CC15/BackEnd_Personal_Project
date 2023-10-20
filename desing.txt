@@ -1,0 +1,15 @@
+register
+    POST /auth/register
+    BODY Email,userName,password,confirmPassword
+    RESPONSE 
+        201 { accessToken: string }
+        400 { message: string }
+        500 { message: string }
+
+login
+    POST /auth/login
+    BODY userName,password
+    RESPONSE 
+        201 { accessToken: string,user {} }
+        400 { message: string }
+        500 { message: string }
