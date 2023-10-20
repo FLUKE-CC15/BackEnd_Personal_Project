@@ -19,7 +19,7 @@ exports.register = async (req, res, next) => {
         console.log(value)
         delete user.password
         res.status(201).json({ accessToken,user })
-    } catch (err) {
+    }   catch (err) {
         next(err);
     }
 }
