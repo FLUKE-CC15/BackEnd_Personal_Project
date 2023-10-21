@@ -1,4 +1,4 @@
-const { registerSchema, loginSchema } = require('../validators/auth-validator')
+const { registerSchema, loginSchema, productlistSchema, productListSchema } = require('../validators/auth-validator')
 const bcrypt = require('bcryptjs')
 const prisma = require('../models/prisma')
 const jwt = require('jsonwebtoken')
@@ -50,6 +50,22 @@ exports.login = async (req, res, next) => {
         next(err);
     }
 }
+
+exports.product = async (req, res, next) => {
+    try {
+        console.log(req.body)
+        const { value } = productListSchema.validate(req.body)
+        const producttype = await prisma.productlist.create({ data: value })
+        const payload = {};
+        const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'รักนะ', { expiresIn: process.env.JWT_EXPIRE })
+        console.log(value)
+        res.status(201).json({ accessToken, producttype })
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
+
 exports.getMe = (req, res) => {
     res.status(200).json({ user: req.user });
 };
