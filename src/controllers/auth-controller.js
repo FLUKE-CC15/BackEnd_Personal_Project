@@ -18,8 +18,8 @@ exports.register = async (req, res, next) => {
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'รักนะ', { expiresIn: process.env.JWT_EXPIRE })
         console.log(value)
         delete user.password
-        res.status(201).json({ accessToken,user })
-    }   catch (err) {
+        res.status(201).json({ accessToken, user })
+    } catch (err) {
         next(err);
     }
 }
@@ -30,15 +30,15 @@ exports.login = async (req, res, next) => {
             return next(error)
         }
         const user = await prisma.user.findFirst({
-            where: {userName: value.userName}
+            where: { userName: value.userName }
         });
-        if(!user){
-            return next(createError('invalid credential',400)) 
+        if (!user) {
+            return next(createError('invalid credential', 400))
         }
 
-        const isMatch = await bcrypt.compare(value.password,user.password)
-        if(!isMatch){
-            return next(createError('invalid credential',400)) 
+        const isMatch = await bcrypt.compare(value.password, user.password)
+        if (!isMatch) {
+            return next(createError('invalid credential', 400))
         }
         const payload = { userId: user.id };
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'รักนะ', { expiresIn: process.env.JWT_EXPIRE })
@@ -52,4 +52,4 @@ exports.login = async (req, res, next) => {
 }
 exports.getMe = (req, res) => {
     res.status(200).json({ user: req.user });
-  };
+};
