@@ -1,4 +1,4 @@
-const { registerSchema, loginSchema, productlistSchema, productListSchema } = require('../validators/auth-validator')
+const { registerSchema, loginSchema, productListSchema } = require('../validators/auth-validator')
 const bcrypt = require('bcryptjs')
 const prisma = require('../models/prisma')
 const jwt = require('jsonwebtoken')
@@ -51,20 +51,71 @@ exports.login = async (req, res, next) => {
     }
 }
 
-exports.product = async (req, res, next) => {
+exports.createProduct = async (req, res, next) => {
     try {
-        console.log(req.body)
         const { value } = productListSchema.validate(req.body)
-        const producttype = await prisma.productlist.create({ data: value })
-        const payload = {};
-        const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'รักนะ', { expiresIn: process.env.JWT_EXPIRE })
-        console.log(value)
-        res.status(201).json({ accessToken, producttype })
+        const product = await prisma.productlist.create({ data: value })
+        res.status(201).json({ product })
     } catch (err) {
         console.log(err)
         next(err);
     }
 }
+
+exports.allproduct = async (req, res, next) => {
+    try {
+        const getproduct = await prisma.productlist.findMany()
+        res.status(201).json({ getproduct })
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
+
+exports.deleteProduct = async (req, res, next) => {
+    try {
+        await prisma.productlist.findFirst({
+            where: {
+                id: +req.body.id
+            }
+        });
+        // if (!product) {
+        //     return res.status(404).json({ error: "Product not found" });
+        // }
+        await prisma.productlist.delete({ where: { id: +req.body.id } });
+        res.status(201).json({ message: "Product deleted successfully" });
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
+
+exports.updatedProduct = async (req, res, next) => {
+    try {
+        console.log(req.body)
+        const { ProductName, price, information, image, productType } = req.body;
+        const updatedProduct = await prisma.productlist.update({
+            where: { id: +req.body.id },
+            data: {
+                ProductName,
+                price,
+                information,
+                image,
+                productType,
+            },
+        });
+        res.status(200).json({ updatedProduct });
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
+
+
+
+
+
+
 
 exports.getMe = (req, res) => {
     res.status(200).json({ user: req.user });
