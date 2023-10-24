@@ -112,6 +112,23 @@ exports.updatedProduct = async (req, res, next) => {
 }
 
 
+exports.uploadProductImg = async (req, res, next) => {
+    try {
+        const productImg = await prisma.productlist.create({
+            data: {
+                image,
+            },
+        });
+
+        res.status(200).json(productImg);
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
+
+
+
 
 
 
