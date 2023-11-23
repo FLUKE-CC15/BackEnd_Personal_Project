@@ -12,4 +12,6 @@ router.get('/me', authenticateMiddleware, authController.getMe);
 router.delete('/product', authController.deleteProduct)
 router.put('/product', authController.updatedProduct)
 router.post('/upload', authController.uploadProductImg)
+router.post('/order', authController.createOrder);
+router.get('/getorder', authController.allOrder);
 module.exports = router;

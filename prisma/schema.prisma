@@ -15,16 +15,38 @@ model user {
   userName     String @unique
   email        String @unique
   password     String
-  isAdmin      String?
+  isAdmin     Boolean  @default(false)
+  orders       Order[]
 }
 
-model productlist {
+model Product {
   id           Int     @id @default(autoincrement())
   ProductName  String 
   price        String
-  information  String
-  image        String
+  information  String @db.LongText
+  image        String? @db.LongText
   productType  String
+  orders       Order[]
+  // categoryId  Int
+  // category    Category   @relation(fields: [categoryId], references: [id])
 }
+
+model Order {
+  id           Int            @id @default(autoincrement())
+  paySlip      String? @db.LongText
+  userId       Int
+  user         user           @relation(fields: [userId], references: [id])
+  productId   Int
+  product     Product   @relation(fields: [productId], references: [id])
+}
+
+
+// model Category {
+//   id       Int       @id @default(autoincrement())
+//   name     String
+//   products Product[]
+// }
+
+
 
 

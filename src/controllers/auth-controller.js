@@ -1,9 +1,8 @@
-const { registerSchema, loginSchema, productListSchema } = require('../validators/auth-validator')
+const { registerSchema, loginSchema, ProductSchema } = require('../validators/auth-validator')
 const bcrypt = require('bcryptjs')
 const prisma = require('../models/prisma')
 const jwt = require('jsonwebtoken')
 const createError = require('../utils/create-error')
-
 exports.register = async (req, res, next) => {
     try {
         console.log(req.body)
@@ -11,7 +10,6 @@ exports.register = async (req, res, next) => {
         if (error) {
             return next(error)
         }
-
         value.password = await bcrypt.hash(value.password, 12)
         const user = await prisma.user.create({ data: value })
         const payload = { userId: user.id };
@@ -35,7 +33,6 @@ exports.login = async (req, res, next) => {
         if (!user) {
             return next(createError('invalid credential', 400))
         }
-
         const isMatch = await bcrypt.compare(value.password, user.password)
         if (!isMatch) {
             return next(createError('invalid credential', 400))
@@ -51,21 +48,27 @@ exports.login = async (req, res, next) => {
     }
 }
 
-exports.createProduct = async (req, res, next) => {
+
+exports.allproduct = async (req, res, next) => {
     try {
-        const { value } = productListSchema.validate(req.body)
-        const product = await prisma.productlist.create({ data: value })
-        res.status(201).json({ product })
+        const getproduct = await prisma.Product.findMany()
+        res.status(201).json({ getproduct })
     } catch (err) {
         console.log(err)
         next(err);
     }
 }
 
-exports.allproduct = async (req, res, next) => {
+exports.allOrder = async (req, res, next) => {
     try {
-        const getproduct = await prisma.productlist.findMany()
-        res.status(201).json({ getproduct })
+        const getOrder = await prisma.Order.findMany({
+            include: {
+                product: true,
+                user: true
+            }
+        })
+        console.log(getOrder)
+        res.status(201).json({ getOrder })
     } catch (err) {
         console.log(err)
         next(err);
@@ -74,7 +77,7 @@ exports.allproduct = async (req, res, next) => {
 
 exports.deleteProduct = async (req, res, next) => {
     try {
-        await prisma.productlist.findFirst({
+        await prisma.Product.findFirst({
             where: {
                 id: +req.body.id
             }
@@ -82,7 +85,7 @@ exports.deleteProduct = async (req, res, next) => {
         // if (!product) {
         //     return res.status(404).json({ error: "Product not found" });
         // }
-        await prisma.productlist.delete({ where: { id: +req.body.id } });
+        await prisma.Product.delete({ where: { id: +req.body.id } });
         res.status(201).json({ message: "Product deleted successfully" });
     } catch (err) {
         console.log(err)
@@ -94,7 +97,7 @@ exports.updatedProduct = async (req, res, next) => {
     try {
         console.log(req.body)
         const { ProductName, price, information, image, productType } = req.body;
-        const updatedProduct = await prisma.productlist.update({
+        const updatedProduct = await prisma.Product.update({
             where: { id: +req.body.id },
             data: {
                 ProductName,
@@ -114,7 +117,7 @@ exports.updatedProduct = async (req, res, next) => {
 
 exports.uploadProductImg = async (req, res, next) => {
     try {
-        const productImg = await prisma.productlist.create({
+        const productImg = await prisma.Product.create({
             data: {
                 image,
             },
@@ -126,13 +129,43 @@ exports.uploadProductImg = async (req, res, next) => {
         next(err);
     }
 }
+exports.createProduct = async (req, res, next) => {
+    try {
+        const { value } = ProductSchema.validate(req.body)
+        const product = await prisma.Product.create({ data: value })
+        res.status(201).json({ product })
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
 
-
-
-
-
-
-
+exports.createOrder = async (req, res, next) => {
+    console.log(req.body, "----------")
+    const userId = req.body.user;
+    const productId = req.body.product;
+    try {
+        const order = await prisma.Order.create({
+            data: {
+                paySlip: req.body.paySlip,
+                user: {
+                    connect: {
+                        id: userId,
+                    }
+                },
+                product: {
+                    connect: {
+                        id: productId,
+                    }
+                },
+            },
+        });
+        res.status(200).json({ order });
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
 
 exports.getMe = (req, res) => {
     res.status(200).json({ user: req.user });

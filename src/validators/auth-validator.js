@@ -19,7 +19,7 @@ const loginSchema = Joi.object({
 
 exports.loginSchema = loginSchema;
 
-const productListSchema = Joi.object({
+const ProductSchema = Joi.object({
     ProductName: Joi.string().required(),
     price: Joi.string().required(),
     information: Joi.string().required(),
@@ -27,4 +27,4 @@ const productListSchema = Joi.object({
     ProductType: Joi.string().required(),
 })
 
-exports.productListSchema = productListSchema;
+exports.ProductSchema = ProductSchema;
