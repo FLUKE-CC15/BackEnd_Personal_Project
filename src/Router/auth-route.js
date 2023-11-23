@@ -14,4 +14,6 @@ router.put('/product', authController.updatedProduct)
 router.post('/upload', authController.uploadProductImg)
 router.post('/order', authController.createOrder);
 router.get('/getorder', authController.allOrder);
+router.get('/myorder', authenticateMiddleware, authController.getMyOrder);
+router.patch('/updatedorder/:id', authController.updatedOrder);
 module.exports = router;

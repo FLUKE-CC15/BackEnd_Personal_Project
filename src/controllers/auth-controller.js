@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const createError = require('../utils/create-error')
 exports.register = async (req, res, next) => {
     try {
-        console.log(req.body)
+        // console.log(req.body)
         const { value, error } = registerSchema.validate(req.body)
         if (error) {
             return next(error)
@@ -14,7 +14,7 @@ exports.register = async (req, res, next) => {
         const user = await prisma.user.create({ data: value })
         const payload = { userId: user.id };
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'รักนะ', { expiresIn: process.env.JWT_EXPIRE })
-        console.log(value)
+        // console.log(value)
         delete user.password
         res.status(201).json({ accessToken, user })
     } catch (err) {
@@ -39,7 +39,7 @@ exports.login = async (req, res, next) => {
         }
         const payload = { userId: user.id };
         const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY || 'รักนะ', { expiresIn: process.env.JWT_EXPIRE })
-        console.log(value)
+        // console.log(value)
         delete user.password
         res.status(201).json({ accessToken, user })
 
@@ -67,8 +67,26 @@ exports.allOrder = async (req, res, next) => {
                 user: true
             }
         })
-        console.log(getOrder)
+        // console.log(getOrder)
         res.status(201).json({ getOrder })
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
+
+exports.getMyOrder = async (req, res, next) => {
+    try {
+        const getMyOrder = await prisma.Order.findMany({
+            where: {
+                userId: +req.user.id
+            },
+            include: {
+                product: true
+            }
+        })
+        console.log(getMyOrder, '++++++++++++++++++++++++++++')
+        res.status(201).json({ getMyOrder })
     } catch (err) {
         console.log(err)
         next(err);
@@ -95,7 +113,7 @@ exports.deleteProduct = async (req, res, next) => {
 
 exports.updatedProduct = async (req, res, next) => {
     try {
-        console.log(req.body)
+        // console.log(req.body)
         const { ProductName, price, information, image, productType } = req.body;
         const updatedProduct = await prisma.Product.update({
             where: { id: +req.body.id },
@@ -108,6 +126,23 @@ exports.updatedProduct = async (req, res, next) => {
             },
         });
         res.status(200).json({ updatedProduct });
+    } catch (err) {
+        console.log(err)
+        next(err);
+    }
+}
+exports.updatedOrder = async (req, res, next) => {
+    try {
+        const Orderstatus = await prisma.Order.update({
+            where: {
+                id: +req.params.id
+            },
+            data: {
+                status: "PAID",
+            },
+        })
+        // console.log(Orderstatus)
+        res.status(200).json({ Orderstatus });
     } catch (err) {
         console.log(err)
         next(err);
@@ -141,7 +176,7 @@ exports.createProduct = async (req, res, next) => {
 }
 
 exports.createOrder = async (req, res, next) => {
-    console.log(req.body, "----------")
+    // console.log(req.body, "----------")
     const userId = req.body.user;
     const productId = req.body.product;
     try {
